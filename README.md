@@ -5,12 +5,17 @@ See attached write-up for more information.
 
 ## Setting Up
 You require the following packages (all avaiable via `pip`)
-- Python 3.10+
+- Python 3.10.7
 - SQLite
 - WTForms
 - Flask
 - Flask-Login
 - SGNlp
+
+Using the following command:
+```bash
+pip install -r requirements.txt
+```
 
 Then run with any command line of your choice,
 ```bash
