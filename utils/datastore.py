@@ -24,6 +24,7 @@ init_table = {
             user_id INTEGER,
             rating INTEGER,
             comment TEXT,
+            flag TEXT,
             FOREIGN KEY(teacher_id) REFERENCES teachers(id),
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
@@ -44,7 +45,7 @@ insert_table = {
     INSERT INTO users (username, password) VALUES (?, ?);
     """,
     "add_review": """
-    INSERT INTO reviews (teacher_id, user_id, rating, comment) VALUES (?, ?, ?, ?);
+    INSERT INTO reviews (teacher_id, user_id, rating, comment, flag) VALUES (?, ?, ?, ?, ?);
     """,
     "create_school": """
     INSERT INTO schools VALUES (id, name);
@@ -71,7 +72,7 @@ query_table = {
     WHERE teachers.id = ?;
     """,
     "get_review": """
-    SELECT users.username AS username, reviews.rating AS rating, reviews.comment AS review
+    SELECT users.username AS username, reviews.rating AS rating, reviews.comment AS review, reviews.flag AS flag
     FROM reviews
     JOIN users ON users.id = reviews.user_id
     WHERE reviews.teacher_id = ?
@@ -185,12 +186,7 @@ class Datastore:
         if prediction == []:
             conn.execute(
                 insert_table["add_review"],
-                (
-                    teacher_id,
-                    user_id,
-                    fallback_rating,
-                    review,
-                ),
+                (teacher_id, user_id, fallback_rating, review, "Manual"),
             )
             conn.commit()
         else:
@@ -199,12 +195,7 @@ class Datastore:
             )
             conn.execute(
                 insert_table["add_review"],
-                (
-                    teacher_id,
-                    user_id,
-                    rating,
-                    review,
-                ),
+                (teacher_id, user_id, rating, review, "AI"),
             )
             conn.commit()
 

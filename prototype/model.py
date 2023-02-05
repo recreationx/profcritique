@@ -75,6 +75,7 @@ class ReviewSentiment:
                 "sentence": sentence.lower(),
             },
         ]
+        print(inputs)
 
         processed_inputs, processed_indices = self.preprocessor(inputs)
         raw_outputs = self.model(processed_indices)
