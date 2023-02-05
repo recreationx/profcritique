@@ -117,14 +117,40 @@ def review_teacher(teacher_id=""):
 @app.route("/teacher/<teacher_id>/review/add", methods=["POST"])
 @login_required
 def add_review(teacher_id=""):
-    db.add_review(
+    review_id = db.add_review(
         teacher_id,
         current_user.id,
         5.0,
         request.form["review"],
         request.form["fallback_rating"],
     )
+    rating = db.get_review_by_id(review_id)["rating"]
+    aggregated = db.get_teacher_by_id(teacher_id)["rating"]
+    print(rating, aggregated)
+    if aggregated + 1 <= rating or rating <= aggregated - 1:
+        return redirect(
+            url_for("modify_review", teacher_id=teacher_id, review_id=review_id)
+        )
     return redirect(url_for("teacher_profile", teacher_id=teacher_id))
+
+
+@app.route("/teacher/<teacher_id>/review/<review_id>/modify", methods=["GET", "POST"])
+@login_required
+def modify_review(teacher_id="", review_id=""):
+    if request.method == "POST":
+        db.delete_review(review_id)
+        review_id = db.add_review(
+            teacher_id,
+            current_user.id,
+            5.0,
+            request.form["review"],
+            request.form["fallback_rating"],
+        )
+        return redirect(url_for("teacher_profile", teacher_id=teacher_id))
+    result = db.get_teacher_by_id(teacher_id)
+    return render_template(
+        "manual_review.html", teacher_id=teacher_id, review_id=review_id, result=result
+    )
 
 
 if __name__ == "__main__":

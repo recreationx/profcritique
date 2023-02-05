@@ -83,6 +83,11 @@ query_table = {
     FROM reviews
     WHERE reviews.teacher_id = ?
     """,
+    "get_review_by_id": """
+    SELECT reviews.rating AS rating
+    FROM reviews
+    WHERE reviews.id = ?;
+    """,
 }
 
 
@@ -182,23 +187,37 @@ class Datastore:
 
     def add_review(self, teacher_id, user_id, rating, review, fallback_rating):
         conn = self.get_conn()
+        cur = conn.cursor()
         prediction = self.predictor.predict(review)
         if prediction == []:
-            conn.execute(
+            cur.execute(
                 insert_table["add_review"],
                 (teacher_id, user_id, fallback_rating, review, "Manual"),
             )
+            review_id = cur.lastrowid
             conn.commit()
         else:
             rating = sum((2 * i) + 3 for i in prediction[0]["labels"]) // len(
                 prediction[0]["labels"]
             )
-            conn.execute(
+            cur.execute(
                 insert_table["add_review"],
                 (teacher_id, user_id, rating, review, "AI"),
             )
+            review_id = cur.lastrowid
             conn.commit()
+        return review_id
 
     def get_review(self, teacher_id):
         reviews = self.get_records("get_review", (int(teacher_id),))
         return reviews
+
+    def get_review_by_id(self, review_id):
+        review_rating = self.get_record("get_review_by_id", (int(review_id),))
+        return review_rating
+
+    def delete_review(self, review_id):
+        conn = self.get_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM reviews WHERE id = ?", (int(review_id),))
+        conn.commit()
