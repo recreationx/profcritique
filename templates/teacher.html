@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<section class="section is-small">
+    <div class="columns">
+        <div class="column is-one-third">
+            <figure class="image">
+                <img src="{{url_for('static', filename='teacher_profile.png')}}">
+            </figure>
+        </div>
+        <div class="column is-two-thirds">
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title is-1">{{ result["teacher_name"] }}</h1>
+                    <h2 class="subtitle is-4">{{ result["school_name"] }}</h2>
+                </div>
+                <div class="column is-4">
+                    <h1 class="title is-3">⭐⭐⭐⭐⭐</h1>
+                    <h1 class="title is-2   "><b>{{ result["rating"]|round(1) }}</b> out of 5</h1>
+                </div>
+            </div>
+            <hr style="border-top: 2px solid #e0e0eb;">
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title is-3">Reviews</h1>
+                </div>
+                <div class="column is-3">
+                    <a class="button is-link" href="/teacher/{{ teacher_id }}/review">Make a review</a>
+                </div>
+            </div>
+            {% if reviews %}
+            {% for review in reviews %}
+            <div class="row">
+                <hr style="border-top: 1px solid #e0e0eb;">
+                <h1 class="title is-4">{{ review["username"] }}</h1>
+                <h2 class="subtitle is-5"><b>{{ review["rating"] }}</b> ⭐⭐⭐⭐⭐</h2>
+                <p class="is-size-5">{{ review["review"] }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+</section>
+{% endblock %}

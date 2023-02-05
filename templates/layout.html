@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ProfCritique</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img src="{{url_for('static', filename='logo.png')}}" width="200" height="30">
+            </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div class="navbar-end">
+            <div class="navbar-item">
+                {% if current_user.is_authenticated %}
+
+                <h3 style="margin-right:7px">Welcome, <b>{{ current_user.username}}</b></h3>
+                <a class="button is-light" href="/logout">
+                    Log out
+                </a>
+
+                {% else %}
+                <div class="buttons">
+                    <a class="button is-primary" href="/signup">
+                        <strong>Sign up</strong>
+                    </a>
+                    <a class="button is-light" href="/login">
+                        Log in
+                    </a>
+                </div>
+
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% block body %}
+    {% endblock %}
+
+</body>
+
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>
+            <strong>ProfCritique © 2023</strong>
+        </p>
+    </div>
+</footer>
+
+</html>

@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block body %}
+{% with messages = get_flashed_messages(with_categories=True)%}
+{% if messages %}
+{% for category, message in messages %}
+<div class="notification is-{{ category }}">
+    <button class="delete"></button>
+    <h5>{{ message }}<h5>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<section class="section is-small">
+    <div class="columns">
+        <div class="column">
+            <form method='POST' action="/login">
+                {{ form.hidden_tag() }}
+                <h1 class="title is-1">Log In</h1>
+                <div class="field">
+                    {{ form.username.label(class="label")}}
+                    {{ form.username(class="input", placeholder="Username")}}
+                </div>
+                <div class="field">
+                    {{ form.password.label(class="label")}}
+                    {{ form.password(class="input", placeholder="Password")}}
+                </div>
+                <br>
+                <div class="field is-grouped">
+                    <div class="control">
+                        {{ form.submit(class="button is-link")}}
+                    </div>
+                    <a class="button is-link is-light" href="/signup">Sign up</a>
+                </div>
+            </form>
+        </div>
+        <div class="column">
+            <figure class="image">
+                <img src="../static/login.png">
+            </figure>
+        </div>
+    </div>
+</section>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+            const $notification = $delete.parentNode;
+
+            $delete.addEventListener('click', () => {
+                $notification.parentNode.removeChild($notification);
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+</html>

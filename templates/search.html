@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block body %}
+<section class="section is-small ">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <form action="/search" method="post">
+                <div class="field">
+                    <label class="label">Search</label>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Search for a teacher" name="teacher">
+                    </div>
+                </div>
+            </form>
+            <br>
+            {% if not result %}
+            <article class="message is-danger">
+                <div class="message-body">
+                    No results found.
+                </div>
+            </article>
+            {% endif %}
+        </div>
+    </div>
+    {% for i in result %}
+    <div class="row">
+        <div class="columns">
+            {% for x in i %}
+            <div class="column is-3">
+                <div class="card">
+                    <div class="card-image">
+                        <figure class="image is-100x100">
+                            <img src="{{url_for('static', filename='teacher_profile.png')}}">
+                        </figure>
+                    </div>
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    <img class="is-rounded" src="{{url_for('static', filename='teacher_profile.png')}}">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <p class="title is-4">{{x["teacher_name"]}}</p>
+                                <p class="subtitle is-6">{{x["school_name"]}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="card-footer">
+                        <a class="card-footer-item" href="/teacher/{{x['teacher_id']}}">View Teacher</a>
+                        <a href="/teacher/{{x['teacher_id']}}/review" class="card-footer-item">Review</a>
+                    </footer>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
