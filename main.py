@@ -126,36 +126,65 @@ def add_review(teacher_id=""):
         5.0,
         request.form["review"],
         request.form["fallback_rating"],
+        "Reliable",
     )
     rating = db.get_review_by_id(review_id)["rating"]
     aggregated = db.get_teacher_by_id(teacher_id)["rating"]
-    print(rating, aggregated)
+    if abs(int(request.form["fallback_rating"]) - rating) > 1:
+        return redirect(
+            url_for(
+                "modify_review",
+                teacher_id=teacher_id,
+                review_id=review_id,
+                modify_type=1,
+            )
+        )
+
     if aggregated + 1 <= rating or rating <= aggregated - 1:
         return redirect(
-            url_for("modify_review", teacher_id=teacher_id, review_id=review_id)
+            url_for(
+                "modify_review",
+                teacher_id=teacher_id,
+                review_id=review_id,
+                modify_type=1,
+            )
         )
     return redirect(url_for("teacher_profile", teacher_id=teacher_id))
 
 
-@app.route("/teacher/<teacher_id>/review/<review_id>/modify", methods=["GET", "POST"])
+@app.route(
+    "/teacher/<teacher_id>/review/<review_id>/modify/<modify_type>",
+    methods=["GET", "POST"],
+)
 @login_required
-def modify_review(teacher_id="", review_id=""):
+def modify_review(modify_type="", teacher_id="", review_id=""):
     if request.method == "POST":
-        db.delete_review(review_id)
-        review_id = db.add_review(
-            teacher_id,
-            current_user.id,
-            5.0,
-            request.form["review"],
-            request.form["fallback_rating"],
-        )
-        rating = db.get_review_by_id(review_id)["rating"]
-        aggregated = db.get_teacher_by_id(teacher_id)["rating"]
-        if aggregated + 1 <= rating or rating <= aggregated - 1:
-            return redirect(
-                url_for("modify_review", teacher_id=teacher_id, review_id=review_id)
+        if modify_type == "1":  # AI calulcated does not match aggregated score
+            db.delete_review(review_id)
+            review_id = db.add_review(
+                teacher_id,
+                current_user.id,
+                5.0,
+                request.form["review"],
+                request.form["fallback_rating"],
+                "Reliable",
             )
-        return redirect(url_for("teacher_profile", teacher_id=teacher_id))
+            rating = db.get_review_by_id(review_id)["rating"]
+            aggregated = db.get_teacher_by_id(teacher_id)["rating"]
+            if aggregated + 1 <= rating or rating <= aggregated - 1:
+                return redirect(
+                    url_for(
+                        "modify_review",
+                        teacher_id=teacher_id,
+                        review_id=review_id,
+                        modify_type=1,
+                    )
+                )
+            return redirect(url_for("teacher_profile", teacher_id=teacher_id))
+        elif modify_type == "2":  # Cancellation
+            db.update_review(review_id)
+            return redirect(url_for("teacher_profile", teacher_id=teacher_id))
+
     result = db.get_teacher_by_id(teacher_id)
     return render_template(
         "manual_review.html", teacher_id=teacher_id, review_id=review_id, result=result

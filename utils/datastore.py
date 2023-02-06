@@ -1,5 +1,6 @@
 import sqlite3
 from prototype.model import ReviewSentiment
+from bias_prototype.model import BiasSentiment
 
 init_table = {
     "teachers": """
@@ -25,6 +26,9 @@ init_table = {
             rating INTEGER,
             comment TEXT,
             flag TEXT,
+            bias_rating INTEGER,
+            bias_flag TEXT,
+            reliable_flag TEXT,
             FOREIGN KEY(teacher_id) REFERENCES teachers(id),
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
@@ -45,7 +49,7 @@ insert_table = {
     INSERT INTO users (username, password) VALUES (?, ?);
     """,
     "add_review": """
-    INSERT INTO reviews (teacher_id, user_id, rating, comment, flag) VALUES (?, ?, ?, ?, ?);
+    INSERT INTO reviews (teacher_id, user_id, rating, comment, flag, bias_rating, bias_flag, reliable_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     """,
     "create_school": """
     INSERT INTO schools VALUES (id, name);
@@ -72,7 +76,7 @@ query_table = {
     WHERE teachers.id = ?;
     """,
     "get_review": """
-    SELECT users.username AS username, reviews.rating AS rating, reviews.comment AS review, reviews.flag AS flag
+    SELECT users.username AS username, reviews.rating AS rating, reviews.comment AS review, reviews.flag AS flag, reviews.bias_rating AS bias_rating, reviews.bias_flag as bias_flag, reviews.reliable_flag AS reliable_flag
     FROM reviews
     JOIN users ON users.id = reviews.user_id
     WHERE reviews.teacher_id = ?
@@ -84,7 +88,7 @@ query_table = {
     WHERE reviews.teacher_id = ?
     """,
     "get_review_by_id": """
-    SELECT reviews.rating AS rating
+    SELECT reviews.rating AS rating, reviews.bias_rating AS bias_rating, reviews.bias_flag AS bias_flag, reviews.reliable_flag AS reliable_flag
     FROM reviews
     WHERE reviews.id = ?;
     """,
@@ -100,6 +104,7 @@ class Datastore:
         """
         self.uri = uri
         self.predictor = ReviewSentiment()
+        self.bias_predictor = BiasSentiment()
 
     def get_conn(self) -> sqlite3.Connection:
         """Retrieves a connection with the database
@@ -185,14 +190,33 @@ class Datastore:
             score["rating"] = 0.0
         return dict(teacher, **score)
 
-    def add_review(self, teacher_id, user_id, rating, review, fallback_rating):
+    def add_review(
+        self, teacher_id, user_id, rating, review, fallback_rating, reliable_flag
+    ):
         conn = self.get_conn()
         cur = conn.cursor()
         prediction = self.predictor.predict(review)
+        bias_prediction = self.bias_predictor.predict(review)
         if prediction == []:
+            bias_rating = sum((2 * i) + 3 for i in bias_prediction[0]["labels"]) // len(
+                prediction[0]["labels"]
+            )
+            if bias_rating >= 2.5:
+                bias_flag = "Biased"
+            else:
+                bias_flag = "Unbiased"
             cur.execute(
                 insert_table["add_review"],
-                (teacher_id, user_id, fallback_rating, review, "Manual"),
+                (
+                    teacher_id,
+                    user_id,
+                    fallback_rating,
+                    review,
+                    "Manual",
+                    bias_rating,
+                    bias_flag,
+                    reliable_flag,
+                ),
             )
             review_id = cur.lastrowid
             conn.commit()
@@ -200,9 +224,25 @@ class Datastore:
             rating = sum((2 * i) + 3 for i in prediction[0]["labels"]) // len(
                 prediction[0]["labels"]
             )
+            bias_rating = sum((2 * i) + 3 for i in bias_prediction[0]["labels"]) // len(
+                prediction[0]["labels"]
+            )
+            if bias_rating >= 2.5:
+                bias_flag = "Biased"
+            else:
+                bias_flag = "Unbiased"
             cur.execute(
                 insert_table["add_review"],
-                (teacher_id, user_id, rating, review, "AI"),
+                (
+                    teacher_id,
+                    user_id,
+                    rating,
+                    review,
+                    "AI",
+                    bias_rating,
+                    bias_flag,
+                    reliable_flag,
+                ),
             )
             review_id = cur.lastrowid
             conn.commit()
@@ -220,4 +260,13 @@ class Datastore:
         conn = self.get_conn()
         cur = conn.cursor()
         cur.execute("DELETE FROM reviews WHERE id = ?", (int(review_id),))
+        conn.commit()
+
+    def update_review(self, review_id):
+        conn = self.get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE reviews SET reliable_flag = 'Unreliable' WHERE id = ?",
+            (int(review_id),),
+        )
         conn.commit()

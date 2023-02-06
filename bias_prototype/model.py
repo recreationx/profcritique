@@ -35,7 +35,7 @@ aspect_list = [
 ]
 
 
-class ReviewSentiment:
+class BiasSentiment:
     def __init__(self):
         self.tokenizer = SenticGCNBertTokenizer.from_pretrained("bert-base-uncased")
 

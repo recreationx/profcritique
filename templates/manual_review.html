@@ -28,7 +28,7 @@
                 <div class="column">
                     <h1 class="title is-3">Modify your review</h1>
 
-                    <form action="/teacher/{{ teacher_id }}/review/{{ review_id }}/modify" method="post">
+                    <form action="/teacher/{{ teacher_id }}/review/{{ review_id }}/modify/1" method="post">
 
                         <div class="field">
                             <label class="label">Review</label>
@@ -55,7 +55,10 @@
                             <div class="control">
                                 <button class="button is-link">Re-submit</button>
                             </div>
-                            <a class="button is-link is-light" href="/teacher/{{teacher_id}}">Proceed</a>
+                            <div class="control">
+                                <button class="button is-link is-light"
+                                    formaction="/teacher/{{ teacher_id}}/review/{{ review_id }}/modify/2">Proceed</a>
+                            </div>
                         </div>
                     </form>
                 </div>
