@@ -23,8 +23,8 @@
         <div class="column">
           <h1 class="title is-3">Reviews</h1>
           <button class="button" id="all-button">All</button>
-          <button class="button" id="bias-button">Biased</button>
-          <button class="button" id="unbias-button">Unbiased</button>
+          <button class="button" id="bias-button">Reliable</button>
+          <button class="button" id="unbias-button">Unreliable</button>
         </div>
         <div class="column is-3">
           <a class="button is-link" href="/teacher/{{ teacher_id }}/review">Make a review</a>
@@ -53,22 +53,27 @@
   const unbiasButton = document.querySelector("#unbias-button");
   const allButton = document.querySelector("#all-button");
 
-  function filterRows(filterValue) {
+  biasButton.addEventListener("click", function () {
     reviews.forEach(review => {
       const biasFlag = review.querySelector(".tag.is-info.is-medium").textContent;
-      if (biasFlag === filterValue) {
+      const reliableFlag = review.querySelector(".tag.is-primary.is-medium").textContent;
+      if (biasFlag === "Unbiased" && reliableFlag === "Verified") {
         review.style.display = "block";
       } else {
         review.style.display = "none";
       }
-    });
-  }
-
-  biasButton.addEventListener("click", function () {
-    filterRows("Biased");
+    })
   });
   unbiasButton.addEventListener("click", function () {
-    filterRows("Unbiased");
+    reviews.forEach(review => {
+      const biasFlag = review.querySelector(".tag.is-info.is-medium").textContent;
+      const reliableFlag = review.querySelector(".tag.is-primary.is-medium").textContent;
+      if (!(biasFlag === "Unbiased" && reliableFlag === "Verified")) {
+        review.style.display = "block";
+      } else {
+        review.style.display = "none";
+      }
+    })
   });
   allButton.addEventListener("click", function () {
     reviews.forEach(review => {

@@ -126,11 +126,14 @@ def add_review(teacher_id=""):
         5.0,
         request.form["review"],
         request.form["fallback_rating"],
-        "Reliable",
+        "Verified",
     )
     rating = db.get_review_by_id(review_id)["rating"]
     aggregated = db.get_teacher_by_id(teacher_id)["rating"]
     if abs(int(request.form["fallback_rating"]) - rating) > 1:
+        flash(
+            "AI-determined rating and manual rating varies. Please re-confirm your submission."
+        )
         return redirect(
             url_for(
                 "modify_review",
@@ -141,6 +144,9 @@ def add_review(teacher_id=""):
         )
 
     if aggregated + 1 <= rating or rating <= aggregated - 1:
+        flash(
+            "Your previous review differs by a huge margin from the reviewee's ratings. Please try again. If not, cancel to proceed regardless."
+        )
         return redirect(
             url_for(
                 "modify_review",
@@ -157,7 +163,7 @@ def add_review(teacher_id=""):
     methods=["GET", "POST"],
 )
 @login_required
-def modify_review(modify_type="", teacher_id="", review_id=""):
+def modify_review(modify_type="", teacher_id="", review_id="", message=""):
     if request.method == "POST":
         if modify_type == "1":  # AI calulcated does not match aggregated score
             db.delete_review(review_id)
@@ -167,7 +173,7 @@ def modify_review(modify_type="", teacher_id="", review_id=""):
                 5.0,
                 request.form["review"],
                 request.form["fallback_rating"],
-                "Reliable",
+                "Verified",
             )
             rating = db.get_review_by_id(review_id)["rating"]
             aggregated = db.get_teacher_by_id(teacher_id)["rating"]

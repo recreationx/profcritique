@@ -266,7 +266,7 @@ class Datastore:
         conn = self.get_conn()
         cur = conn.cursor()
         cur.execute(
-            "UPDATE reviews SET reliable_flag = 'Unreliable' WHERE id = ?",
+            "UPDATE reviews SET reliable_flag = 'Unverified' WHERE id = ?",
             (int(review_id),),
         )
         conn.commit()

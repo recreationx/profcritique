@@ -2,8 +2,15 @@
 {% block body %}
 <div class="notification is-danger">
     <button class="delete"></button>
-    <h5>Your previous review differs by a huge margin from the reviewee's ratings. Please try again. If not, cancel to
-        proceed regardless.<h5>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
 </div>
 <section class="section is-small">
     <div class="columns">
