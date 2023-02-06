@@ -1,0 +1,15 @@
+{
+  "_name_or_path": "C:\\Users\\zinc\\AppData\\Local\\Temp\\tmptjzxjqm3\\repeat4\\pytorch_model.bin",
+  "architectures": [
+    "SenticGCNBertModel"
+  ],
+  "device": "cuda",
+  "dropout": 0.1,
+  "embed_dim": 300,
+  "hidden_dim": 768,
+  "loss_function": "cross_entropy",
+  "max_seq_len": 85,
+  "polarities_dim": 3,
+  "torch_dtype": "float32",
+  "transformers_version": "4.25.1"
+}

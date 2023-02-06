@@ -102,6 +102,9 @@ def search():
 def teacher_profile(teacher_id=""):
     result = db.get_teacher_by_id(teacher_id)
     reviews = db.get_review(teacher_id)
+    print(result["rating"])
+    print(round(result["rating"], None) * "⭐")
+    result["bar"] = round(result["rating"], None) * "⭐"
     return render_template(
         "teacher.html", teacher_id=teacher_id, result=result, reviews=reviews
     )
@@ -146,6 +149,12 @@ def modify_review(teacher_id="", review_id=""):
             request.form["review"],
             request.form["fallback_rating"],
         )
+        rating = db.get_review_by_id(review_id)["rating"]
+        aggregated = db.get_teacher_by_id(teacher_id)["rating"]
+        if aggregated + 1 <= rating or rating <= aggregated - 1:
+            return redirect(
+                url_for("modify_review", teacher_id=teacher_id, review_id=review_id)
+            )
         return redirect(url_for("teacher_profile", teacher_id=teacher_id))
     result = db.get_teacher_by_id(teacher_id)
     return render_template(
