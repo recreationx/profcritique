@@ -1,4 +1,4 @@
-# ProfCritique
+# RapportCard
 This was done for National AI Challenge 2022.
 
 See attached write-up for more information.
